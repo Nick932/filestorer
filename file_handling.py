@@ -6,6 +6,8 @@ GiveFile - to return it;
 UploadFile - the class to upload file.
 '''
 
+import os
+
 
 
 class FindFile:
@@ -38,7 +40,36 @@ class DeleteFile(FindFile):
 
 
 
-class UploadFile:
+class CreateFile:
     '''
     This class handles file uploads by users.
     ''' 
+    def create(self, file_bytes:bytes, file_name:str, file_type:str, subdir:str = None):
+        '''
+        Creates a file using file bytes.
+
+        Expected next arguments:
+
+
+        Returns True, if the file was created or False, if not.
+        '''
+        filename = file_name+'.'+file_type
+        cwd = None
+
+        if subdir:
+            cwd = os.getcwd()
+            os.mkdir(os.sep+subdir)
+            os.chdir(os.sep+subdir)
+
+        file_obj = open(filename, 'wb')
+        file_obj.write(file_bytes)
+        file_obj.close()
+
+        if cwd:
+            os.chdir(cwd)
+
+        return True
+
+
+
+FileCreator = CreateFile()
