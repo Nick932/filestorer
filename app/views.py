@@ -9,11 +9,12 @@ Here are defined views of FastAPI's server:
 from app import app
 from fastapi import File, UploadFile
 from file_handling import FileCreator
-from tools import Hasher, Folder
+from tools import Hash, Folder
+import glob
 
 
 
-@app.get("/")
+@app.get("/") #NOTE: delete me
 async def root():
     return {"message": "Hello World"}
 
@@ -23,8 +24,12 @@ async def root():
 async def upload_file(file: UploadFile = File(default = None)):
 
     file_bytes = await file.read()
-    filename = Hasher.get_hash(file_bytes)
+
+    hasher = Hash(file_bytes)
+    filename = hasher.get_hash()
+
     filetype = file.filename.split('.')[-1]
+
     await file.close()
 
     file_folder = filename[:2]
@@ -34,12 +39,25 @@ async def upload_file(file: UploadFile = File(default = None)):
 
     file_created = FileCreator.create(
         file_bytes = file_bytes, 
-        filename = filename, 
-        filetype = filetype,
+        file_name = filename, 
+        file_type = filetype,
         subdir = file_folder,
         )
     
     if file_created:
         return {'file_name': filename}
     else:
-        return{'error':'internal server error while creating file'}
+        return {'error':'the file already exists', 'file_name': filename}
+
+
+
+@app.get("/download/")
+async def download_file(file_hash: str = None): #TODO: find the dir with first 2 symbols of the hash
+
+    if not file_hash:
+        return {'error':'file_hash-parameter value required'}
+        
+    file_name = str(file_hash)
+    search_query = file_name+'.*'
+    print(glob.glob('*'), search_query)
+

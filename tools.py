@@ -7,6 +7,7 @@ This module implements instruments for next goals:
 '''
 
 from hashlib import md5
+import os
 
 
 
@@ -84,20 +85,21 @@ class Folder:
 
 
 class Hash:
-  '''Creates a hash.'''
+  '''Creates a hash.
 
-  def get_hash(obj_bytes:bytes):
-    '''
     Creates a hash based on object's bytes.
 
-    Expects 1 argument:
+    Expects 1 argument in constructor:
     obj_bytes(bytes) - an array of file's bytes. 
+    '''
+  def __init__(self, obj_bytes:bytes):
+    self.obj_bytes = obj_bytes
 
+
+  def get_hash(self):
+
+    '''
     Returns str - the hash of object.
     '''
-    hashed = md5(obj_bytes)
+    hashed = md5(self.obj_bytes)
     return str(hashed.hexdigest())
-
-
-
-  Hasher = Hash()
