@@ -15,26 +15,24 @@ class FindFile:
     This class implements the basic method for
     inner use: it finds file by it's name.
     '''
-    def __init__(self, filename:str, subdir:str = None):
-        self.filename = filename
+    def __init__(self, file_name:str, sub_dir:str = None):
 
+        self.filename = file_name
+        self.subdir = sub_dir
 
-
-class GiveFile(FindFile):
-    '''
-    This class returns the file with the given 
-    name.
-    '''
     def get():
-        '''Returns the file.'''
+        '''Returns the opened file.'''
+
+        if self.subdir:
+            cwd = os.getcwd()
+            os.chdir(self_subdir)
+            file = open(self.filename, 'rb')
+            os.chdir(cwd)
+            return file
+
+        
 
 
-
-class DeleteFile(FindFile):
-    '''
-    This class deletes the file with the given
-    name.
-    '''
     def delete():
         '''Deletes the file.'''
 
@@ -59,7 +57,7 @@ class CreateFile:
         full_file_name = file_name+'.'+file_type
         cwd = None
 
-        if subdir:
+        if subdir: #TODO: implement the context manager for dir changing
             os.chdir(subdir)
 
         if full_file_name in os.listdir():

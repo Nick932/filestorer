@@ -5,12 +5,12 @@ Here are defined views of FastAPI's server:
 '''
 
 
-
+import os
 from app import app
 from fastapi import File, UploadFile
-from file_handling import FileCreator
+from file_handling import FileCreator, FindFile
 from tools import Hash, Folder
-import glob
+from starlette.responses import StreamingResponse
 
 
 
@@ -52,12 +52,21 @@ async def upload_file(file: UploadFile = File(default = None)):
 
 
 @app.get("/download/")
-async def download_file(file_hash: str = None): #TODO: find the dir with first 2 symbols of the hash
+async def download_file(file_hash: str = None):
 
     if not file_hash:
         return {'error':'file_hash-parameter value required'}
-        
-    file_name = str(file_hash)
-    search_query = file_name+'.*'
-    print(glob.glob('*'), search_query)
+
+    subdir = str(file_hash[:2])
+    
+    cwd = os.getcwd() #TODO: implement the context manager for dir changing
+    os.chdir(subdir)
+    index = None
+    for obj in os.listdir():
+        if file_hash in obj:
+            index = os.listdir().index(obj)
+    file = open(os.listdir()[index], 'rb')
+    os.chdir(cwd)
+
+    return StreamingResponse(file)
 
