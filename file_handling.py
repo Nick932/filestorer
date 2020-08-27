@@ -20,15 +20,24 @@ class FindFile:
         self.filename = file_name
         self.subdir = sub_dir
 
-    def get():
+    def get(self):
         '''Returns the opened file.'''
-
-        if self.subdir:
+    
+        if self.subdir: #TODO: implement the context manager for dir changing
             cwd = os.getcwd()
-            os.chdir(self_subdir)
-            file = open(self.filename, 'rb')
+            os.chdir(self.subdir)
+            
+        index = None
+        for obj in os.listdir():
+            if self.filename in obj:
+                index = os.listdir().index(obj)
+
+        file = os.path.abspath(os.listdir()[index])
+
+        if cwd:
             os.chdir(cwd)
-            return file
+
+        return file
 
         
 

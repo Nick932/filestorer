@@ -10,7 +10,7 @@ from app import app
 from fastapi import File, UploadFile
 from file_handling import FileCreator, FindFile
 from tools import Hash, Folder
-from starlette.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 
 
 
@@ -57,16 +57,8 @@ async def download_file(file_hash: str = None):
     if not file_hash:
         return {'error':'file_hash-parameter value required'}
 
-    subdir = str(file_hash[:2])
-    
-    cwd = os.getcwd() #TODO: implement the context manager for dir changing
-    os.chdir(subdir)
-    index = None
-    for obj in os.listdir():
-        if file_hash in obj:
-            index = os.listdir().index(obj)
-    file = open(os.listdir()[index], 'rb')
-    os.chdir(cwd)
-
-    return StreamingResponse(file)
+    fileobj = FindFile(file_hash, sub_dir = file_hash[:2])
+    #file = open(fileobj.get(), 'rb')
+    file = fileobj.get()
+    return FileResponse(file)
 
