@@ -3,14 +3,14 @@ Here are defined views of FastAPI's server:
 
 
 '''
-
+#FIXME: везде: если папка\файл not found, возвращать 404!
 
 import os
 from app import app
 from fastapi import File, UploadFile
 from file_handling import FileCreator, FindFile
 from tools import Hash, Folder
-from fastapi.responses import StreamingResponse, FileResponse
+from starlette.responses import StreamingResponse, FileResponse
 
 
 
@@ -32,7 +32,7 @@ async def upload_file(file: UploadFile = File(default = None)):
 
     await file.close()
 
-    file_folder = filename[:2]
+    file_folder = filename[:2] #FIXME: correct path is: store/ab/filename !
 
     folder_creator = Folder(file_folder)
     folder_creator.prepare()
@@ -55,10 +55,23 @@ async def upload_file(file: UploadFile = File(default = None)):
 async def download_file(file_hash: str = None):
 
     if not file_hash:
-        return {'error':'file_hash-parameter value required'}
+        return {'error':'file_hash-parameter value required'} #NOTE: doubles!
 
     fileobj = FindFile(file_hash, sub_dir = file_hash[:2])
-    #file = open(fileobj.get(), 'rb')
-    file = fileobj.get()
-    return FileResponse(file)
+    file = open(fileobj.get(), 'rb')
 
+    return StreamingResponse(file)
+
+
+
+@app.delete("/delete/")
+async def delete_file (file_hash: str = None):
+
+    if not file_hash:
+        return {'error':'file_hash-parameter value required'} #NOTE: doubles!
+
+    file = FindFile(file_hash, sub_dir = file_hash[:2])
+    file_deleted = file.delete()
+
+    if file_deleted:
+        return {'info_message':'file successfully deleted'}

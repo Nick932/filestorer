@@ -10,19 +10,19 @@ import os
 from tools import Folder
 
 
+
 class FindFile:
     '''
-    This class implements the basic method for
-    inner use: it finds file by it's name.
+    This class finds file by it's name.
     '''
     def __init__(self, file_name:str, sub_dir:str = None):
 
         self.filename = file_name
         self.subdir = sub_dir
 
-    def get(self):
-        '''Returns the opened file.'''
-    
+
+    def _find(self):
+
         if self.subdir: #TODO: implement the context manager for dir changing
             cwd = os.getcwd()
             os.chdir(self.subdir)
@@ -36,14 +36,25 @@ class FindFile:
 
         if cwd:
             os.chdir(cwd)
+        
+        return file
+
+
+    def get(self):
+        '''Returns the absolute file path + filename + filetype.'''
+
+        file = self._find()
 
         return file
 
-        
 
-
-    def delete():
+    def delete(self):
         '''Deletes the file.'''
+
+        file = self._find()
+        os.remove(file)
+
+        return True
 
 
 
