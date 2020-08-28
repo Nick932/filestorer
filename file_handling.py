@@ -78,6 +78,7 @@ class CreateFile:
         cwd = None
 
         if subdir: #TODO: implement the context manager for dir changing
+            cwd = os.getcwd()
             os.chdir(subdir)
 
         if full_file_name in os.listdir():

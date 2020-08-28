@@ -11,6 +11,7 @@ from fastapi import File, UploadFile
 from file_handling import FileCreator, FindFile
 from tools import Hash, Folder
 from starlette.responses import StreamingResponse, FileResponse
+from starlette.requests import Request
 
 
 
@@ -43,7 +44,7 @@ async def upload_file(file: UploadFile = File(default = None)):
         file_type = filetype,
         subdir = file_folder,
         )
-    
+
     if file_created:
         return {'file_name': filename}
     else:
