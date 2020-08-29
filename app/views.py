@@ -8,11 +8,13 @@ Here are defined views of FastAPI's server:
 import os
 from app import app
 from fastapi import File, UploadFile
-from file_handling import FileCreator, FindFile
+from file_handling import FileCreator, FileHandler
 from tools import Hash, Folder
 from starlette.responses import StreamingResponse, FileResponse
 from starlette.requests import Request
 from hashlib import md5
+
+STORE_DIR = 'store'
 
 
 
@@ -25,7 +27,7 @@ async def root():
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(default = None)):
 
-    sub_folder = 'store'
+    sub_folder = STORE_DIR
     store_folder = Folder(sub_folder)
     store_folder.prepare()
 
@@ -44,13 +46,13 @@ async def upload_file(file: UploadFile = File(default = None)):
 @app.get("/download/")
 async def download_file(file_hash: str = None):
 
-    if not file_hash:
+    if not file_hash: #NOTE: doubles!
         return {'error':'file_hash-parameter value required'} #NOTE: doubles!
 
-    fileobj = FindFile(file_hash, sub_dir = file_hash[:2])
-    if not fileobj: #NOTE: doubles!
-        return {'error': 'file does not exist'}
-    file = open(fileobj.get(), 'rb')
+    file = FileHandler(file_hash, sub_dir = STORE_DIR) #NOTE: doubles!
+    if not file: #NOTE: doubles!
+        return {'error': 'file does not exist'} #NOTE: doubles!
+    file = open(file.get(), 'rb')
 
     return StreamingResponse(file)
 
@@ -59,12 +61,12 @@ async def download_file(file_hash: str = None):
 @app.delete("/delete/")
 async def delete_file (file_hash: str = None):
 
-    if not file_hash:
+    if not file_hash: #NOTE: doubles!
         return {'error':'file_hash-parameter value required'} #NOTE: doubles!
 
-    file = FindFile(file_hash, sub_dir = file_hash[:2])
-    if not fileobj: #NOTE: doubles!
-        return {'error': 'file does not exist'}
+    file = FileHandler(file_hash, sub_dir = STORE_DIR) #NOTE: doubles!
+    if not file: #NOTE: doubles!
+        return {'error': 'file does not exist'} #NOTE: doubles!
     file_deleted = file.delete()
 
     if file_deleted:

@@ -14,35 +14,34 @@ from hashlib import md5
 
 
 
-class FindFile: #TODO: rename it
+class FileHandler:
     '''
     This class finds file by it's name.
     '''
     def __init__(self, file_name:str, sub_dir:str = ''):
 
+        self.cwd = os.getcwd()
         self.filename = file_name
         self.subdir = sub_dir
+        self.subdir_path = os.path.join(self.cwd, self.subdir)
         self.filedir = self.filename[:2]
 
     def _find(self):
 
         if self.subdir:
-            if not self.filedir in os.listdir(self.subdir):
+            if not self.filedir in os.listdir(self.subdir_path):
                 return None
         path_to_filedir = os.path.join(self.subdir, self.filedir)
-            
 
-        index = None
+        full_name = None
         filedir_content = os.listdir(path_to_filedir)
         for obj in filedir_content:
             if self.filename in obj:
-                index = filedir_content.index(obj)
-
-        if not index:
+                full_name = obj
+        if full_name == None:
             return None
 
-
-        file = os.path.abspath(filedir_content[index])
+        file = os.path.abspath(os.path.join(path_to_filedir, full_name))
         
         return file
 
@@ -116,18 +115,18 @@ class CreateFile:
         sub_folder_name = filename[:2]
         sub_folder_path = os.path.join(subdir, sub_folder_name)
 
-        # Rename the temp sub folder
-        try:
-            os.rename(temp_folder_path, sub_folder_path) #FIXME: what if already exists?
-        except OSError:
-            if 'Directory not empty' in str(sys.exc_info()[1]):
-                if filename in os.listdir(sub_folder_path):
-                    shutil.rmtree(temp_folder_path)
-                    return 0, filename
-                
-        # Rename the exiting temp file.
-        renamed_file_path = os.path.join(sub_folder_path, filename)
-        os.rename(os.path.join(sub_folder_path, temp_file_name), renamed_file_path)
+        # If the file already exists:
+        if sub_folder_name in os.listdir(subdir):
+            if filename in os.listdir(sub_folder_path):
+                shutil.rmtree(temp_folder_path)
+                return 0, filename
+
+        # Rename the exiting temp file:
+        renamed_file_path = os.path.join(temp_folder_path, filename)
+        os.rename(os.path.join(temp_folder_path, temp_file_name), renamed_file_path)
+
+        # Rename temp folder:
+        shutil.move(temp_folder_path, sub_folder_path)
 
         return 1, filename
 
