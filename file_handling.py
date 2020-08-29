@@ -29,7 +29,7 @@ class FindFile: #TODO: rename it
         if self.subdir:
             if not self.filedir in os.listdir(self.subdir):
                 return None
-        path_to_filedir = os.sep.join([self.subdir, self.filedir])
+        path_to_filedir = os.path.join(self.subdir, self.filedir)
             
 
         index = None
@@ -89,12 +89,12 @@ class CreateFile:
         file_type = file.filename.split('.')[-1]
 
         temp_folder_name = 'tempfolder'
-        temp_folder_path = os.sep.join([subdir, temp_folder_name])
+        temp_folder_path = os.path.join(subdir, temp_folder_name)
         temp_folder = Folder(temp_folder_path)
         temp_folder.prepare()
 
         temp_file_name = 'tempfile'
-        temp_file_path = os.sep.join([temp_folder_path,temp_file_name])
+        temp_file_path = os.path.join(temp_folder_path,temp_file_name)
         temp_file = open(temp_file_path, 'wb')
         hash_code = md5()
 
@@ -114,7 +114,7 @@ class CreateFile:
         the_hash = hash_code.hexdigest()
         filename = '.'.join([the_hash, file_type]) #TODO: make tests for final hash
         sub_folder_name = filename[:2]
-        sub_folder_path = os.sep.join([subdir, sub_folder_name])
+        sub_folder_path = os.path.join(subdir, sub_folder_name)
 
         # Rename the temp sub folder
         try:
@@ -126,8 +126,8 @@ class CreateFile:
                     return 0, filename
                 
         # Rename the exiting temp file.
-        renamed_file_path = sub_folder_path+os.sep+filename
-        os.rename(sub_folder_path+os.sep+temp_file_name, renamed_file_path)
+        renamed_file_path = os.path.join(sub_folder_path, filename)
+        os.rename(os.path.join(sub_folder_path, temp_file_name), renamed_file_path)
 
         return 1, filename
 
