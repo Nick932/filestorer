@@ -6,36 +6,43 @@ GiveFile - to return it;
 UploadFile - the class to upload file.
 '''
 
-import os
+import os,sys
+import shutil
 from tools import Folder
+from fastapi import UploadFile
+from hashlib import md5
 
 
 
-class FindFile:
+class FindFile: #TODO: rename it
     '''
     This class finds file by it's name.
     '''
-    def __init__(self, file_name:str, sub_dir:str = None):
+    def __init__(self, file_name:str, sub_dir:str = ''):
 
         self.filename = file_name
         self.subdir = sub_dir
-
+        self.filedir = self.filename[:2]
 
     def _find(self):
 
-        if self.subdir: #TODO: implement the context manager for dir changing
-            cwd = os.getcwd()
-            os.chdir(self.subdir)
+        if self.subdir:
+            if not self.filedir in os.listdir(self.subdir):
+                return None
+        path_to_filedir = os.sep.join([self.subdir, self.filedir])
             
+
         index = None
-        for obj in os.listdir():
+        filedir_content = os.listdir(path_to_filedir)
+        for obj in filedir_content:
             if self.filename in obj:
-                index = os.listdir().index(obj)
+                index = filedir_content.index(obj)
 
-        file = os.path.abspath(os.listdir()[index])
+        if not index:
+            return None
 
-        if cwd:
-            os.chdir(cwd)
+
+        file = os.path.abspath(filedir_content[index])
         
         return file
 
@@ -61,37 +68,68 @@ class FindFile:
 class CreateFile:
     '''
     This class handles file uploads by users.
+    
+    Creates a file and calculate it's hash.
     ''' 
-    def create(self, file_bytes:bytes, file_name:str, file_type:str, subdir:str = None):
+    async def create(
+        self, 
+        file:UploadFile, 
+        subdir:str = ''):
         '''
-        Creates a file using file bytes.
+        Creates a file using UploadFile object from fastapi.
 
         Expected next arguments:
-        file_bytes (bytes) - an array of file's bytes.
-        file_name (str) - the name of the file, excluding the format of a file.
-        file_type (str) - a type of the file.
+        file (bytes) - an UploadFile object.
         subdir (str) - the optional sub directory for the file.
 
-        Returns True, if the file was created or False, if it's already exist.
+        Returns 1 and name of the file, if the file was created or 
+        0 and name of the file, if it already exist.
         '''
-        full_file_name = file_name+'.'+file_type
-        cwd = None
 
-        if subdir: #TODO: implement the context manager for dir changing
-            cwd = os.getcwd()
-            os.chdir(subdir)
+        file_type = file.filename.split('.')[-1]
 
-        if full_file_name in os.listdir():
-            return False
+        temp_folder_name = 'tempfolder'
+        temp_folder_path = os.sep.join([subdir, temp_folder_name])
+        temp_folder = Folder(temp_folder_path)
+        temp_folder.prepare()
 
-        file_obj = open(full_file_name, 'wb')
-        file_obj.write(file_bytes)
-        file_obj.close()
+        temp_file_name = 'tempfile'
+        temp_file_path = os.sep.join([temp_folder_path,temp_file_name])
+        temp_file = open(temp_file_path, 'wb')
+        hash_code = md5()
 
-        if cwd:
-            os.chdir(cwd)
 
-        return True
+        while True:
+
+            chunk = await file.read(20000)
+
+            if not chunk:
+                break
+
+            hash_code.update(chunk)
+            temp_file.write(chunk)
+        
+
+        temp_file.close()
+        the_hash = hash_code.hexdigest()
+        filename = '.'.join([the_hash, file_type]) #TODO: make tests for final hash
+        sub_folder_name = filename[:2]
+        sub_folder_path = os.sep.join([subdir, sub_folder_name])
+
+        # Rename the temp sub folder
+        try:
+            os.rename(temp_folder_path, sub_folder_path) #FIXME: what if already exists?
+        except OSError:
+            if 'Directory not empty' in str(sys.exc_info()[1]):
+                if filename in os.listdir(sub_folder_path):
+                    shutil.rmtree(temp_folder_path)
+                    return 0, filename
+                
+        # Rename the exiting temp file.
+        renamed_file_path = sub_folder_path+os.sep+filename
+        os.rename(sub_folder_path+os.sep+temp_file_name, renamed_file_path)
+
+        return 1, filename
 
 
 

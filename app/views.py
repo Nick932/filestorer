@@ -12,6 +12,7 @@ from file_handling import FileCreator, FindFile
 from tools import Hash, Folder
 from starlette.responses import StreamingResponse, FileResponse
 from starlette.requests import Request
+from hashlib import md5
 
 
 
@@ -24,31 +25,19 @@ async def root():
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(default = None)):
 
-    file_bytes = await file.read()
+    sub_folder = 'store'
+    store_folder = Folder(sub_folder)
+    store_folder.prepare()
 
-    hasher = Hash(file_bytes)
-    filename = hasher.get_hash()
-
-    filetype = file.filename.split('.')[-1]
-
-    await file.close()
-
-    file_folder = filename[:2] #FIXME: correct path is: store/ab/filename !
-
-    folder_creator = Folder(file_folder)
-    folder_creator.prepare()
-
-    file_created = FileCreator.create(
-        file_bytes = file_bytes, 
-        file_name = filename, 
-        file_type = filetype,
-        subdir = file_folder,
+    file_created, file_name = await FileCreator.create(
+        file = file, 
+        subdir = sub_folder,
         )
 
     if file_created:
-        return {'file_name': filename}
+        return {'file_name': file_name}
     else:
-        return {'error':'the file already exists', 'file_name': filename}
+        return {'error':'the file already exists', 'file_name': file_name}
 
 
 
@@ -59,6 +48,8 @@ async def download_file(file_hash: str = None):
         return {'error':'file_hash-parameter value required'} #NOTE: doubles!
 
     fileobj = FindFile(file_hash, sub_dir = file_hash[:2])
+    if not fileobj: #NOTE: doubles!
+        return {'error': 'file does not exist'}
     file = open(fileobj.get(), 'rb')
 
     return StreamingResponse(file)
@@ -72,6 +63,8 @@ async def delete_file (file_hash: str = None):
         return {'error':'file_hash-parameter value required'} #NOTE: doubles!
 
     file = FindFile(file_hash, sub_dir = file_hash[:2])
+    if not fileobj: #NOTE: doubles!
+        return {'error': 'file does not exist'}
     file_deleted = file.delete()
 
     if file_deleted:

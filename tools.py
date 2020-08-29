@@ -7,7 +7,7 @@ This module implements instruments for next goals:
 '''
 
 from hashlib import md5
-import os
+import os, sys
 
 
 
