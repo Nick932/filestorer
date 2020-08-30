@@ -3,14 +3,13 @@ Here are defined views of FastAPI's server:
 
 
 '''
-#FIXME: везде: если папка\файл not found, возвращать 404!
 
 import os
 from app import app
-from fastapi import File, UploadFile
+from fastapi import File, UploadFile, Response, status
 from file_handling import FileCreator, FileHandler
 from tools import Hash, Folder
-from starlette.responses import StreamingResponse, FileResponse
+from starlette.responses import FileResponse
 from starlette.requests import Request
 from hashlib import md5
 
@@ -25,7 +24,7 @@ async def root():
 
 
 @app.post("/upload/")
-async def upload_file(file: UploadFile = File(default = None)):
+async def upload_file(response: Response, file: UploadFile = File(default = None)):
 
     sub_folder = STORE_DIR
     store_folder = Folder(sub_folder)
@@ -37,37 +36,51 @@ async def upload_file(file: UploadFile = File(default = None)):
         )
 
     if file_created:
+        response.status_code = 201
         return {'file_name': file_name}
     else:
+        response.status_code = 304
         return {'error':'the file already exists', 'file_name': file_name}
 
 
 
 @app.get("/download/")
-async def download_file(file_hash: str = None):
+async def download_file(response: Response, file_hash: str = None):
 
-    if not file_hash: #NOTE: doubles!
-        return {'error':'file_hash-parameter value required'} #NOTE: doubles!
+    if not file_hash: #NOTE: doubles from here...
+        response.status_code = 400
+        return {'error':'file_hash-parameter value required'}
 
-    file = FileHandler(file_hash, sub_dir = STORE_DIR) #NOTE: doubles!
-    if not file: #NOTE: doubles!
-        return {'error': 'file does not exist'} #NOTE: doubles!
-    file = open(file.get(), 'rb')
+    file = FileHandler(file_hash, sub_dir = STORE_DIR)
+    filepath = file.get()
+    if not filepath:
+        response.status_code = 404
+        return {'error': 'file does not exist'} #NOTE: ... to here!
 
-    return StreamingResponse(file)
+    filename = os.path.split(filepath)[-1]
+    response.status_code = 200
+    return FileResponse(filepath, filename = filename )
 
 
 
 @app.delete("/delete/")
-async def delete_file (file_hash: str = None):
+async def delete_file (response: Response, file_hash: str = None):
 
-    if not file_hash: #NOTE: doubles!
-        return {'error':'file_hash-parameter value required'} #NOTE: doubles!
+    if not file_hash: #NOTE: doubles from here...
+        response.status_code = 400
+        return {'error':'file_hash-parameter value required'}
 
-    file = FileHandler(file_hash, sub_dir = STORE_DIR) #NOTE: doubles!
-    if not file: #NOTE: doubles!
-        return {'error': 'file does not exist'} #NOTE: doubles!
+    file = FileHandler(file_hash, sub_dir = STORE_DIR)
+    filepath = file.get()
+    if not filepath:
+        response.status_code = 404
+        return {'error': 'file does not exist'} #NOTE: ... to here!
+    
     file_deleted = file.delete()
-
     if file_deleted:
+        response.status_code = 200
         return {'info_message':'file successfully deleted'}
+    else:
+        response.status_code = 500
+        return {'error':'internal server error while trying to delete file'}
+

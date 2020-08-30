@@ -1,1 +1,4 @@
 DrWeb_workspace.code-workspace
+.vscode
+__pycache__
+statuses.txt

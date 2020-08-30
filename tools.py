@@ -12,13 +12,12 @@ import os, sys
 
 
 class Folder:
-    '''Preparing folder for taks' files. Creates folder if it doesn't exists.
-    Open methods defied here:
-    prepare() - to start whole process.
+    '''Preparing folder. Creates folder if it doesn't exists.
+    Open methods defined here:
+    prepare() - to start the process of folder's creating.
     
     Takes 1 argument:
-    - foldername (in str format) - name of necessary folder for
-      tasks' files.
+    - foldername (in str format) - name of the necessary folder.
     '''
     
     def __init__(self, foldername : str):
@@ -30,11 +29,10 @@ class Folder:
             
     
     def _folder_already_exists(self, foldername : str, current_directory : str):
-        '''Checks if folder with such name already exists in the directory with executed file.
+        '''Checks if folder with such name already exists.
         
         Takes 2 arguments:
-        - foldername (in str format) - name of necessary folder for
-          tasks' files;
+        - foldername (in str format) - name of necessary folder;
         - current_directory (in str format) - path to the current working
           directory.
           
@@ -53,8 +51,8 @@ class Folder:
         '''Creates a folder in the given directory.
         
         Takes 2 arguments:
-        - foldername (in str format) - name of necessary folder;
-        - current_directory (in str format) - necessary directory
+        - foldername (in str format) - name of the necessary folder;
+        - current_directory (in str format) - the necessary directory
           for the folder.
        ''' 
         
@@ -63,7 +61,7 @@ class Folder:
         try:
             os.mkdir(cwd+os.sep+foldername)
         except PermissionError as exception:
-            raise exception('You have no permissions to create folder in this directory:\n'+cwd)
+            raise exception('You have no permissions to create a folder in this directory:\n'+cwd)
         except Exception as exception:
             print('Some unhandled error has occured:\n', sys.exc_info()[1])
             raise exception
@@ -73,8 +71,7 @@ class Folder:
         '''Checks if the folder already exists. If not, creates it.
         
         Delegates both of these processes to internal methods.
-        
-        Defines current working directory for passing it to
+        Defines the current working directory for passing it to
         these internal methods like argument.
         '''
         
@@ -85,9 +82,7 @@ class Folder:
 
 
 class Hash:
-  '''Creates a hash.
-
-    Creates a hash based on object's bytes.
+  '''Creates a hash based on object's bytes.
 
     Expects 1 argument in constructor:
     obj_bytes(bytes) - an array of file's bytes. 

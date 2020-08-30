@@ -16,7 +16,9 @@ from hashlib import md5
 
 class FileHandler:
     '''
-    This class finds file by it's name.
+    This class finds file by it's name and implements next methods:
+    get - returns the absolute filepath and it's name+type.
+    delete - removes the file.
     '''
     def __init__(self, file_name:str, sub_dir:str = ''):
 
@@ -55,7 +57,9 @@ class FileHandler:
 
 
     def delete(self):
-        '''Deletes the file.'''
+        '''Deletes the file.
+        Returns True, if the file was succesfully deleted.
+        '''
 
         file = self._find()
         os.remove(file)
@@ -68,7 +72,7 @@ class CreateFile:
     '''
     This class handles file uploads by users.
     
-    Creates a file and calculate it's hash.
+    Creates a file and calculates it's hash.
     ''' 
     async def create(
         self, 
@@ -82,7 +86,7 @@ class CreateFile:
         subdir (str) - the optional sub directory for the file.
 
         Returns 1 and name of the file, if the file was created or 
-        0 and name of the file, if it already exist.
+        0 and name of the file, if it is already exist.
         '''
 
         file_type = file.filename.split('.')[-1]
