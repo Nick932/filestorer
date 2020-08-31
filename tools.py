@@ -1,5 +1,5 @@
 '''
-This module implements instruments for next goals:
+This module implements next instruments:
 
 - class 'Folder' - to create new folders.
 - class 'Hash' - to create hashes.
@@ -8,6 +8,7 @@ This module implements instruments for next goals:
 
 from hashlib import md5
 import os, sys
+import enum
 
 
 
@@ -98,3 +99,10 @@ class Hash:
     '''
     hashed = md5(self.obj_bytes)
     return str(hashed.hexdigest())
+
+
+
+class Status(enum.Enum):
+  done = 'statusdone'
+  failed = 'statusfailed'
+  exists = 'statusexists'

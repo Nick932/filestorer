@@ -1,16 +1,24 @@
 '''
 This module implements few classes for some work with files:
 
-DeleteFile - to delete it;
-GiveFile - to return it;
-UploadFile - the class to upload file.
+
+CreateFile - this class creates file and returns result status and file's name;
+
+FileHandler - to get a file path or delete a file;
+
+FileInteractor - the class for file management: includes info about file's
+    status, path to the file, and error message data (for example, if file 
+    doesn't exist).
 '''
 
 import os,sys
 import shutil
 from tools import Folder
+from tools import Status as status
 from fastapi import UploadFile
 from hashlib import md5
+
+STORE_DIR = 'store'
 
 
 
@@ -48,7 +56,7 @@ class FileHandler:
         return file
 
 
-    def get(self):
+    def get_path(self):
         '''Returns the absolute file path + filename + filetype.'''
 
         file = self._find()
@@ -115,25 +123,44 @@ class CreateFile:
 
         temp_file.close()
         the_hash = hash_code.hexdigest()
-        filename = '.'.join([the_hash, file_type]) #TODO: make tests for final hash
+        filename = '.'.join([the_hash, file_type])
         sub_folder_name = filename[:2]
         sub_folder_path = os.path.join(subdir, sub_folder_name)
 
-        # If the file already exists:
+        # If the file already exists?
         if sub_folder_name in os.listdir(subdir):
             if filename in os.listdir(sub_folder_path):
                 shutil.rmtree(temp_folder_path)
-                return 0, filename
+                return status.exists.value, filename
 
         # Rename the exiting temp file:
         renamed_file_path = os.path.join(temp_folder_path, filename)
         os.rename(os.path.join(temp_folder_path, temp_file_name), renamed_file_path)
 
-        # Rename temp folder:
+        # Rename the temp folder:
         shutil.move(temp_folder_path, sub_folder_path)
 
-        return 1, filename
+        return status.done.value, filename
 
+
+class FileInteractor:
+
+    def __init__(self, file_hash):
+
+        self.HTTP_status_code = 200
+        self.error_message = None
+        self.file_hash = file_hash
+
+        if not self.file_hash:
+            self.HTTP_status_code = 400
+            self.error_message = {'error':'file_hash-parameter value required'}
+
+        self.file = FileHandler(self.file_hash, sub_dir = STORE_DIR)
+        self.file_path = self.file.get_path()
+
+        if not self.file_path:
+            self.HTTP_status_code = 404
+            self.error_message = {'error': 'file does not exist'}
 
 
 FileCreator = CreateFile()
