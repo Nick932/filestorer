@@ -2,7 +2,7 @@ import os,sys, uvicorn
 
 
 
-def running(debug = True):
+def running(debug = False):
 
     if debug:
         print('The debug option is turned on.')
