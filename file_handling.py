@@ -11,6 +11,8 @@ FileInteractor - the class for file management: includes info about file's
     doesn't exist).
 '''
 
+from logger import logger
+
 import os,sys
 import shutil
 from tools import Folder
@@ -35,6 +37,7 @@ class FileHandler:
         self.subdir = sub_dir
         self.subdir_path = os.path.join(self.cwd, self.subdir)
         self.filedir = self.filename[:2]
+        logger.info('sub dir path:\n{0}\n'.format(self._subdir_path))
 
     def _find(self):
 
@@ -52,6 +55,7 @@ class FileHandler:
             return None
 
         file = os.path.abspath(os.path.join(path_to_filedir, full_name))
+        logger.info('file path:\n{0}\n'.format(file))
         
         return file
 
@@ -93,19 +97,22 @@ class CreateFile:
         file (bytes) - an UploadFile object.
         subdir (str) - the optional sub directory for the file.
 
-        Returns 1 and name of the file, if the file was created or 
-        0 and name of the file, if it is already exist.
+        Returns status.done.value and name of the file, if the 
+        file was created or status.exists.value and name of the file, 
+        if it is already exist.
         '''
 
         file_type = file.filename.split('.')[-1]
 
         temp_folder_name = 'tempfolder'
         temp_folder_path = os.path.join(subdir, temp_folder_name)
+        logger.info('temp folder path:\n{0}\n'.format(temp_folder_path))
         temp_folder = Folder(temp_folder_path)
         temp_folder.prepare()
 
         temp_file_name = 'tempfile'
         temp_file_path = os.path.join(temp_folder_path,temp_file_name)
+        logger.info('temp file path:\n{0}\n'.format(temp_file_path))
         temp_file = open(temp_file_path, 'wb')
         hash_code = md5()
 
@@ -126,6 +133,7 @@ class CreateFile:
         filename = '.'.join([the_hash, file_type])
         sub_folder_name = filename[:2]
         sub_folder_path = os.path.join(subdir, sub_folder_name)
+        logger.info('sub folder path:\n{0}\n'.format(sub_folder_path))
 
         # If the file already exists?
         if sub_folder_name in os.listdir(subdir):
@@ -135,10 +143,12 @@ class CreateFile:
 
         # Rename the exiting temp file:
         renamed_file_path = os.path.join(temp_folder_path, filename)
+        logger.info('renamed file path:\n{0}\n'.format(renamed_file_path))
         os.rename(os.path.join(temp_folder_path, temp_file_name), renamed_file_path)
 
         # Rename the temp folder:
         shutil.move(temp_folder_path, sub_folder_path)
+        logger.info('renamed dir path:\n{0}\n'.format(sub_folder_path))
 
         return status.done.value, filename
 

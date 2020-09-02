@@ -1,7 +1,5 @@
 '''
-Here are defined views of FastAPI's server:
-
-
+Here are defined views of FastAPI's server.
 '''
 
 import os
