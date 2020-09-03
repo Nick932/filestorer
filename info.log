@@ -1,0 +1,13 @@
+[INFO] (23:10:57 "logger") module "logger"
+[func "<module>"]
+
+Logging started!
+
+[INFO] (23:10:57 "logger") module "tests"
+[func "test_chunk_by_chunk_hashing"]
+
+Hash chunk by chunk:
+47506c616b41bf76fd8b367a1f7f2bbd
+Hash of the entire file:
+47506c616b41bf76fd8b367a1f7f2bbd
+

@@ -6,7 +6,7 @@ import os
 from app import app
 from fastapi import File, UploadFile, Response, status
 from file_handling import FileCreator, FileHandler, FileInteractor, STORE_DIR
-from tools import Hash, Folder
+from tools import Folder
 from tools import Status as status
 from starlette.responses import FileResponse
 from starlette.requests import Request
