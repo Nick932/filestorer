@@ -27,8 +27,17 @@ STORE_DIR = 'store'
 class FileHandler:
     '''
     This class finds file by it's name and implements next methods:
+
     get - returns the absolute filepath and it's name+type.
     delete - removes the file.
+
+    :param file_name: the name of the file to work with.
+    :type file_name: str
+
+    :param sub_dir: the name of necessary sub directory to
+    store the file. Defaults to None (file will be storred in current
+    directory).
+    :type sub_dir: str 
     '''
     def __init__(self, file_name:str, sub_dir:str = ''):
 
@@ -40,6 +49,12 @@ class FileHandler:
         logger.info('sub dir path:\n{0}\n'.format(self._subdir_path))
 
     def _find(self):
+        '''
+        Finds the file, that specified like self.filename.
+
+        :return: full file path + file name.
+        :rtype: str
+        ''' 
 
         if self.subdir:
             if not self.filedir in os.listdir(self.subdir_path):
@@ -90,16 +105,20 @@ class CreateFile:
         self, 
         file:UploadFile, 
         subdir:str = ''):
-        '''
-        Creates a file using UploadFile object from fastapi.
+        '''Creates a file using UploadFile object from fastapi.
 
         Expected next arguments:
-        file (bytes) - an UploadFile object.
-        subdir (str) - the optional sub directory for the file.
 
-        Returns status.done.value and name of the file, if the 
+        :param file: An UploadFile object
+        :type file: bytes
+        
+        :param subdir: The optional sub directory for the file.
+        :type subdir: str
+
+        :return: Status.done.value and name of the file, if the 
         file was created or status.exists.value and name of the file, 
         if it is already exist.
+        :rtype: tuple(str, str)
         '''
 
         file_type = file.filename.split('.')[-1]
@@ -154,6 +173,26 @@ class CreateFile:
 
 
 class FileInteractor:
+    '''The interface to an exiting file.
+
+
+    :param str file_hash: A hash of the file, which is used like file's name
+
+    :var int HTTP_status_code: An instance's attribute which contains the HTTP
+    status code.
+
+    :var error_message: An instance's attribute which returns None or dict with
+    only one 'error' key, which value is the error message (str).
+    :type error_message: None or dict
+
+    :var file: A :class: 'FileHandler' object, which gives us it's methods
+    like 'delete'::
+        FileInteractor.file.delete() # will delete the file.
+    :type file: FileHandler
+
+    :var str file_path: A full file path + file name.
+
+    '''    
 
     def __init__(self, file_hash):
 

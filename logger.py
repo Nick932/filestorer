@@ -1,18 +1,17 @@
 '''
 This module provides a logging system.
-
+_______________________________________
 
 
 Set the LOG_LEVEL like you want, and in
 the necessary module you can use the logger
-like this:
-____________________________________________
+like this::
 
-from logger import logger
+        from logger import logger
 
-logger.info('file path is correct.')
-logger.warning('Check the files!')
-____________________________________________
+        logger.info('file path is correct.')
+        logger.warning('Check the files!')
+
 
 Only messages with the higher logging level will be
 shown.
@@ -20,10 +19,9 @@ shown.
 
 
 Also you can get the name of the current logging 
-level, for example:
+level, for example::
 
-print(LEVELS[LOG_LEVEL])
--> 'DEBUG'
+        print(LEVELS[LOG_LEVEL])
 '''
 
 

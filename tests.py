@@ -1,3 +1,6 @@
+''' Usage: python tests.py'''
+
+
 import unittest
 from file_handling import CreateFile
 from hashlib import md5
@@ -9,6 +12,7 @@ class hashingTests(unittest.TestCase):
     '''Tests the hashing process.'''
 
     def setUp(self):
+        ''' Runs before the start of every test in this class.'''
 
         cwd = os.getcwd()
         self.temp_file_path = os.path.join(cwd, 'temp_test_file')
@@ -68,6 +72,7 @@ class hashingTests(unittest.TestCase):
     
 
     def tearDown(self):
+        ''' Runs after every test in this class.'''
 
         for file in [self.temp_file_path, self.example_file_name,]:
             os.remove(file)
